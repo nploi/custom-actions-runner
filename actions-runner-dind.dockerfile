@@ -44,9 +44,14 @@ RUN apt update -y \
     wget \
     zip \
     zstd \
+    libgtk2.0-0 libgtk-3-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb zip \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && ln -sf /usr/bin/pip3 /usr/bin/pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Additional tools
+ADD additional_tools.sh additional_tools.sh
+RUN ./additional_tools.sh
 
 # Runner user
 RUN adduser --disabled-password --gecos "" --uid 1000 runner \
@@ -60,19 +65,19 @@ RUN adduser --disabled-password --gecos "" --uid 1000 runner \
 RUN export ARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) \
     && if [ "$ARCH" = "arm64" ]; then export ARCH=aarch64 ; fi \
     && if [ "$ARCH" = "amd64" ] || [ "$ARCH" = "i386" ]; then export ARCH=x86_64 ; fi \
-	&& if ! curl -f -L -o docker.tgz "https://download.docker.com/linux/static/${DOCKER_CHANNEL}/${ARCH}/docker-${DOCKER_VERSION}.tgz"; then \
-		echo >&2 "error: failed to download 'docker-${DOCKER_VERSION}' from '${DOCKER_CHANNEL}' for '${ARCH}'"; \
-		exit 1; \
-	fi; \
+    && if ! curl -f -L -o docker.tgz "https://download.docker.com/linux/static/${DOCKER_CHANNEL}/${ARCH}/docker-${DOCKER_VERSION}.tgz"; then \
+    echo >&2 "error: failed to download 'docker-${DOCKER_VERSION}' from '${DOCKER_CHANNEL}' for '${ARCH}'"; \
+    exit 1; \
+    fi; \
     echo "Downloaded Docker from https://download.docker.com/linux/static/${DOCKER_CHANNEL}/${ARCH}/docker-${DOCKER_VERSION}.tgz"; \
-	tar --extract \
-		--file docker.tgz \
-		--strip-components 1 \
-		--directory /usr/local/bin/ \
-	; \
-	rm docker.tgz; \
-	dockerd --version; \
-	docker --version
+    tar --extract \
+    --file docker.tgz \
+    --strip-components 1 \
+    --directory /usr/local/bin/ \
+    ; \
+    rm docker.tgz; \
+    dockerd --version; \
+    docker --version
 
 # Runner download supports amd64 as x64
 #
@@ -124,6 +129,9 @@ RUN echo "PATH=${PATH}" > /etc/environment \
 
 # No group definition, as that makes it harder to run docker.
 USER runner
+
+ADD cypress.sh /home/runner/cypress.sh
+RUN /home/runner/cypress.sh 
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 CMD ["startup.sh"]

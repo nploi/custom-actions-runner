@@ -41,6 +41,7 @@ RUN apt update -y \
     wget \
     zip \
     zstd \
+    libgtk2.0-0 libgtk-3-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb zip \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && ln -sf /usr/bin/pip3 /usr/bin/pip \
     && rm -rf /var/lib/apt/lists/*
@@ -51,6 +52,10 @@ RUN export ARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) \
     && if [ "$ARCH" = "amd64" ] || [ "$ARCH" = "i386" ]; then export ARCH=x86_64 ; fi \
     && curl -f -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_${ARCH} \
     && chmod +x /usr/local/bin/dumb-init
+
+# Additional tools
+ADD additional_tools.sh additional_tools.sh
+RUN ./additional_tools.sh
 
 # Docker download supports arm64 as aarch64 & amd64 / i386 as x86_64
 RUN set -vx; \
@@ -130,6 +135,9 @@ RUN echo "PATH=${PATH}" > /etc/environment \
     && echo "ImageOS=${ImageOS}" >> /etc/environment
 
 USER runner
+
+ADD cypress.sh /home/runner/cypress.sh
+RUN /home/runner/cypress.sh 
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 CMD ["entrypoint.sh"]
