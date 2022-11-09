@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # kind
-curl -L https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64 -o /usr/local/bin/kind
+curl -L https://kind.sigs.k8s.io/dl/v0.14.0/kind-linux-amd64 -o /usr/local/bin/kind
 chmod +x /usr/local/bin/kind
 
 # docker-compose
@@ -19,8 +19,8 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 ## helm
-curl -LO https://get.helm.sh/helm-v3.6.3-linux-amd64.tar.gz
-tar -zxvf helm-v3.6.3-linux-amd64.tar.gz
+curl -LO https://get.helm.sh/helm-v3.10.1-linux-amd64.tar.gz
+tar -zxvf helm-v3.10.1-linux-amd64.tar.gz
 mv linux-amd64/helm /usr/local/bin/helm
 
 # jq (the default version is 1.5, which is too outdated)
@@ -28,8 +28,8 @@ curl -LO https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
 install jq-linux64 /usr/bin/jq
 
 # skaffold
-curl -LO https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-install skaffold-linux-amd64 /usr/local/bin/skaffold
+curl -L https://github.com/GoogleContainerTools/skaffold/releases/download/v1.39.2/skaffold-linux-amd64 -o /usr/local/bin/skaffold
+chmod +x /usr/local/bin/skaffold
 
 # parallel
 apt-get install -y parallel
