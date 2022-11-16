@@ -48,3 +48,65 @@ wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
 # Install Chrome.
 apt-get update && apt-get -y install google-chrome-stable \
   && sed -i 's/"$@"/"$@" --no-sandbox --disable-dev-shm-usage/g' /opt/google/chrome/google-chrome
+
+# Prepare a local registry for kind to use
+docker pull kindest/node:v1.21.12@sha256:f316b33dd88f8196379f38feb80545ef3ed44d9197dca1bfd48bcb1583210207
+docker pull registry:2
+docker run -d --restart=always -p "127.0.0.1:5001:5000" --name "kind-registry" registry:2
+
+images_to_cache=(
+  asia.gcr.io/student-coach-e1e95/decrypt-secret:20220219
+  asia.gcr.io/student-coach-e1e95/decrypt-secret:20220517
+  asia.gcr.io/student-coach-e1e95/fake_firebase_token:1.1.0 # for emulators' firebase
+  asia.gcr.io/student-coach-e1e95/customized-graphql-engine:v1.3.3.cli-migrations-v2
+  asia.gcr.io/student-coach-e1e95/customized-graphql-engine:v2.8.1.cli-migrations-v3
+  debian:11.3
+  docker.io/istio/proxyv2:1.14.4 # for istio
+  docker.io/istio/pilot:1.14.4   # for istio
+  letsencrypt/pebble:v2.3.1      # for emulators' letsencrypt
+  minio/mc:RELEASE.2020-12-18T10-53-53Z
+  minio/minio:RELEASE.2020-12-23T02-24-12Z
+  postgres:13.1              # for emulators' postgres
+  mozilla/sops:v3.7.3-alpine # for sops decrypt
+  nats:2.8.4-alpine3.15
+  natsio/nats-box:0.8.1
+  natsio/prometheus-nats-exporter:0.9.3
+  natsio/nats-server-config-reloader:0.7.0
+  asia.gcr.io/student-coach-e1e95/graphql-mesh:0.0.1
+  asia.gcr.io/student-coach-e1e95/wait-for:0.0.1
+
+  asia.gcr.io/student-coach-e1e95/customized_debezium_kafka:1.9.0 # for kafka
+  asia.gcr.io/student-coach-e1e95/customized_debezium_connect:1.9.6
+  asia.gcr.io/student-coach-e1e95/customized_cp_schema_registry:7.1.2
+  asia.gcr.io/student-coach-e1e95/kafkatools:0.0.2
+  provectuslabs/kafka-ui:latest
+
+  asia.gcr.io/student-coach-e1e95/customized-graphql-engine-v2:v1.3.3.cli-migrations-v2
+  # import-map-deployer
+  asia.gcr.io/student-coach-e1e95/import-map-deployer:0.0.1
+  google/cloud-sdk:323.0.0-alpine
+
+  # elastic
+  amazon/opendistro-for-elasticsearch-kibana:1.13.1
+  asia.gcr.io/student-coach-e1e95/customized_elastic:1.13.1
+  quay.io/prometheuscommunity/elasticsearch-exporter:v1.2.1
+
+  # unleash
+  unleashorg/unleash-server:4.8.2
+  unleashorg/unleash-proxy:0.7.1
+  node:14-alpine
+
+  # cert-manager
+  quay.io/jetstack/cert-manager-acmesolver:v1.7.1
+  quay.io/jetstack/cert-manager-cainjector:v1.7.1
+  quay.io/jetstack/cert-manager-controller:v1.7.1
+  quay.io/jetstack/cert-manager-ctl:v1.7.1
+  quay.io/jetstack/cert-manager-webhook:v1.7.1
+)
+for image in "${images_to_cache[@]}"; do
+  docker pull "${image}"
+  docker tag "${image}" "localhost:5001/${image}"
+  docker push "localhost:5001/${image}"
+  docker rmi "${image}"
+  docker rmi "localhost:5001/${image}"
+done
