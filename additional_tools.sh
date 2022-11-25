@@ -34,6 +34,13 @@ chmod +x /usr/local/bin/skaffold
 # parallel
 apt-get install -y parallel
 
+# Github CLI
+export GH_VERSION=2.20.2
+curl -fLO https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz
+tar -zxvf gh_${GH_VERSION}_linux_amd64.tar.gz
+mv gh_${GH_VERSION}_linux_amd64/bin/gh /usr/local/bin/gh
+rm -rf gh_${GH_VERSION}_linux_amd64.tar.gz gh_${GH_VERSION}_linux_amd64
+
 ## node
 curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
 apt-get install -y nodejs
