@@ -62,3 +62,6 @@ wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add
 # Install Chrome.
 apt-get update && apt-get -y install google-chrome-stable \
   && sed -i 's/"$@"/"$@" --no-sandbox --disable-dev-shm-usage/g' /opt/google/chrome/google-chrome
+
+# Install firebase cli
+curl -sL https://firebase.tools | bash -
