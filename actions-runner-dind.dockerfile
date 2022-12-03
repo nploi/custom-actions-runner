@@ -128,6 +128,10 @@ ENV ImageOS=ubuntu20
 RUN echo "PATH=${PATH}" > /etc/environment \
     && echo "ImageOS=${ImageOS}" >> /etc/environment
 
+# Install go
+COPY --from=golang:1.19.1-alpine /usr/local/go/ /usr/local/go/
+ENV PATH="${PATH}:/usr/local/go/bin"
+
 # No group definition, as that makes it harder to run docker.
 USER runner
 
